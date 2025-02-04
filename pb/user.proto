@@ -1,0 +1,32 @@
+syntax = "proto3";
+
+package pb;
+
+option go_package = "user_crud/pb;pb";
+
+service UserService {
+    rpc RegisterUser (RegisterRequest) returns (Empty);
+    rpc LoginUser (LoginRequest) returns (LoginResponse);
+}
+
+message Empty {}
+
+message RegisterRequest {
+    string email = 1;
+    string password = 2;
+    string name = 3;
+    string phone = 4;
+}
+
+message RegisterResponse {
+    string token = 1;
+}
+
+message LoginRequest {
+    string email = 1;
+    string password = 2;
+}
+
+message LoginResponse {
+    string token = 1;
+}
