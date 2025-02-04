@@ -8,8 +8,8 @@ import (
 	"user_crud/db"
 	"user_crud/middleware"
 
-	user "user_crud/User"
 	pb "user_crud/pb/user_crud/pb"
+	user "user_crud/user"
 
 	"github.com/joho/godotenv"
 	"google.golang.org/grpc"
