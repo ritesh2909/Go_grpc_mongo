@@ -9,9 +9,9 @@ import (
 
 var MongoClient *mongo.Client
 
-func Connect() (*mongo.Client, error) {
+func Connect(mongoUri string) (*mongo.Client, error) {
 
-	clientOptions := options.Client().ApplyURI("mongodb+srv://ritesh:ritesh@cluster0.atsdgyg.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0")
+	clientOptions := options.Client().ApplyURI(mongoUri)
 
 	client, err := mongo.Connect(context.TODO(), clientOptions)
 	if err != nil {

@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"net"
+	"os"
 	"user_crud/controllers"
 	"user_crud/db"
 	"user_crud/repositories"
@@ -11,11 +12,21 @@ import (
 
 	pb "user_crud/pb/user_crud/pb"
 
+	"github.com/joho/godotenv"
 	"google.golang.org/grpc"
 )
 
 func main() {
-	client, err := db.Connect()
+	err := godotenv.Load()
+	if err != nil {
+		log.Fatalf("Error loading .env file")
+	}
+
+	mongoURI := os.Getenv("MONGO_URI")
+	if mongoURI == "" {
+		panic("Invalid mongo uri")
+	}
+	client, err := db.Connect(mongoURI)
 	if err != nil {
 		log.Fatalf("Failed to connect to MongoDB: %v", err)
 	}
