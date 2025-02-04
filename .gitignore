@@ -1,0 +1,17 @@
+# Ignore generated pb files
+pb/
+
+# Ignore Go binary
+*.exe
+*.test
+*.out
+
+# Ignore vendor directory
+/vendor/
+
+# Ignore log files
+*.log
+
+# Ignore IDE files (VS Code, etc.)
+.vscode/
+.idea/

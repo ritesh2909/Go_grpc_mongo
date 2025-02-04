@@ -1,8 +1,14 @@
-branch = main
+PROTO_SRC := pb/*.proto
+PROTO_OUT := pb
 
-.PHONY: pb clean deploy
+PROTOC_GEN_GO := protoc-gen-go
+PROTOC_GEN_GRPC := protoc-gen-go-grpc
 
-pb:
-	mkdir -p pb
-	protoc --go_out=pb --go-grpc_out=pb protos/*.proto && \
-	protoc --dart_out=grpc:mobile/lib protos/*.proto
+generate:
+	protoc --go_out=$(PROTO_OUT) --go-grpc_out=$(PROTO_OUT) $(PROTO_SRC)
+
+clean:
+	rm -rf $(PROTO_OUT)/user_crud
+
+build:
+	go build -o myapp main.go
