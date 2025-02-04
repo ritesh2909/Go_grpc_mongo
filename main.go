@@ -5,11 +5,9 @@ import (
 	"log"
 	"net"
 	"os"
-	"user_crud/controllers"
 	"user_crud/db"
-	"user_crud/repositories"
-	"user_crud/services"
 
+	user "user_crud/User"
 	pb "user_crud/pb/user_crud/pb"
 
 	"github.com/joho/godotenv"
@@ -33,10 +31,7 @@ func main() {
 
 	defer db.Disconnect()
 
-	userRepo := repositories.NewMongoUserRepository(client)
-	userService := services.NewUserService(userRepo)
-
-	userController := controllers.NewUserController(userService)
+	userController := user.NewUserController(user.NewUserService(user.NewMongoUserRepository(client)))
 
 	grpcServer := grpc.NewServer()
 	pb.RegisterUserServiceServer(grpcServer, userController)

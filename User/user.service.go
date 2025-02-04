@@ -1,10 +1,8 @@
-package services
+package user
 
 import (
-	"log"
 	"time"
 	"user_crud/models"
-	"user_crud/repositories"
 
 	"github.com/golang-jwt/jwt"
 	"google.golang.org/grpc/codes"
@@ -12,19 +10,16 @@ import (
 )
 
 type UserService struct {
-	userRepo *repositories.UserRepository
+	userRepo *UserRepository
 }
 
-func NewUserService(userRepo *repositories.UserRepository) *UserService {
-	log.Print(userRepo)
-	us := &UserService{
+func NewUserService(userRepo *UserRepository) *UserService {
+	return &UserService{
 		userRepo: userRepo,
 	}
-	return us
 }
 
 func (us *UserService) RegisterUser(name, email, password, phone string) error {
-	log.Print("Call reached the service layer")
 	existingUser, err := us.userRepo.UserExists(email)
 	if err != nil {
 		return err

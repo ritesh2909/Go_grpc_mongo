@@ -1,4 +1,4 @@
-package repositories
+package user
 
 import (
 	"context"
@@ -15,10 +15,17 @@ type UserRepository struct {
 	client *mongo.Client
 }
 
+var userRepository *UserRepository
+
 func NewMongoUserRepository(client *mongo.Client) *UserRepository {
-	return &UserRepository{
-		client: client,
+	if userRepository == nil {
+		userRepository = &UserRepository{
+			client: client,
+		}
 	}
+
+	return userRepository
+
 }
 
 func (ur *UserRepository) UserExists(email string) (bool, error) {
@@ -26,7 +33,6 @@ func (ur *UserRepository) UserExists(email string) (bool, error) {
 		log.Fatal("Mongo client is nil")
 	}
 	var user models.User
-	log.Print("call reaching here")
 	userCollection := ur.client.Database("Crud").Collection("user")
 	err := userCollection.FindOne(context.Background(), bson.M{"email": email}).Decode(&user)
 	if err != nil {
