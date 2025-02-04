@@ -9,6 +9,11 @@ import (
 	"google.golang.org/grpc/status"
 )
 
+type UserServiceInterface interface {
+	RegisterUser(userReq models.UserRegisterRequest) error
+	LoginUser(userReq models.UserLoginRequest) (string, error)
+}
+
 type UserService struct {
 	userRepo *UserRepository
 }
@@ -19,8 +24,8 @@ func NewUserService(userRepo *UserRepository) *UserService {
 	}
 }
 
-func (us *UserService) RegisterUser(name, email, password, phone string) error {
-	existingUser, err := us.userRepo.UserExists(email)
+func (us *UserService) RegisterUser(r models.UserRegisterRequest) error {
+	existingUser, err := us.userRepo.UserExists(r.Email)
 	if err != nil {
 		return err
 	}
@@ -30,10 +35,10 @@ func (us *UserService) RegisterUser(name, email, password, phone string) error {
 	}
 
 	user := models.User{
-		Email:    email,
-		Password: password,
-		Name:     name,
-		Phone:    phone,
+		Email:    r.Email,
+		Password: r.Password,
+		Name:     r.Name,
+		Phone:    r.Phone,
 	}
 
 	err = us.userRepo.CreateUser(user)
@@ -44,8 +49,8 @@ func (us *UserService) RegisterUser(name, email, password, phone string) error {
 	return nil
 }
 
-func (us *UserService) LoginUser(email, password string) (string, error) {
-	userId, err := us.userRepo.ValidateUser(email, password)
+func (us *UserService) LoginUser(r models.UserLoginRequest) (string, error) {
+	userId, err := us.userRepo.ValidateUser(r.Email, r.Password)
 	if err != nil {
 		return "", err
 	}
@@ -56,6 +61,14 @@ func (us *UserService) LoginUser(email, password string) (string, error) {
 	}
 
 	return token, nil
+}
+
+func (us *UserService) GetUserInfo(r models.GetUserInfoRequest) (*models.GetUserInfoResponse, error) {
+	userInfo, err := us.userRepo.GetUserInfo(r.ID)
+	if err != nil {
+		return nil, err
+	}
+	return userInfo, nil
 }
 
 func generateJWT(userId string) (string, error) {

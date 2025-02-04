@@ -6,6 +6,7 @@ import (
 	"net"
 	"os"
 	"user_crud/db"
+	"user_crud/middleware"
 
 	user "user_crud/User"
 	pb "user_crud/pb/user_crud/pb"
@@ -33,7 +34,9 @@ func main() {
 
 	userController := user.NewUserController(user.NewUserService(user.NewMongoUserRepository(client)))
 
-	grpcServer := grpc.NewServer()
+	grpcServer := grpc.NewServer(
+		grpc.UnaryInterceptor(middleware.AuthMiddleware),
+	)
 	pb.RegisterUserServiceServer(grpcServer, userController)
 
 	port := ":50051"

@@ -5,6 +5,7 @@ import (
 	"log"
 	"user_crud/models"
 
+	"github.com/google/uuid"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"google.golang.org/grpc/codes"
@@ -47,6 +48,8 @@ func (ur *UserRepository) UserExists(email string) (bool, error) {
 }
 
 func (ur *UserRepository) CreateUser(userReq models.User) error {
+	userReq.ID = uuid.New().String()
+
 	userCollection := ur.client.Database("Crud").Collection("user")
 	_, err := userCollection.InsertOne(context.Background(), userReq)
 	if err != nil {
@@ -69,4 +72,23 @@ func (ur *UserRepository) ValidateUser(email string, password string) (string, e
 	}
 
 	return user.ID, nil
+}
+
+func (ur *UserRepository) GetUserInfo(id string) (*models.GetUserInfoResponse, error) {
+	userCollection := ur.client.Database("Crud").Collection("user")
+	var user models.User
+	err := userCollection.FindOne(context.Background(), bson.M{"_id": id}).Decode(&user)
+	if err != nil {
+		if err == mongo.ErrNoDocuments {
+			return nil, status.Error(codes.NotFound, "User not found")
+		}
+		log.Print("Error fetching user info", err.Error())
+		return nil, err
+	}
+
+	return &models.GetUserInfoResponse{
+		Name:  user.Name,
+		Email: user.Email,
+		Phone: user.Phone,
+	}, nil
 }
