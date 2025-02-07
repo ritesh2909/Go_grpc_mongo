@@ -3,7 +3,6 @@ package db
 import (
 	"context"
 	"fmt"
-	"log"
 	"os"
 )
 
@@ -11,8 +10,6 @@ func InitDB() (DBService, error) {
 	dbType := os.Getenv("DB_TYPE")
 
 	var dbService DBService
-
-	log.Print("DB i have is", dbType)
 
 	switch dbType {
 	case "mongo":
