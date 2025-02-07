@@ -2,18 +2,19 @@ package db
 
 import (
 	"context"
+	"os"
 
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
+type MongoDBService struct{}
+
 var MongoClient *mongo.Client
 
-func Connect(mongoUri string) (*mongo.Client, error) {
-
-	clientOptions := options.Client().ApplyURI(mongoUri)
-
-	client, err := mongo.Connect(context.TODO(), clientOptions)
+func (m *MongoDBService) Connect(ctx context.Context, uri string) (interface{}, error) {
+	clientOptions := options.Client().ApplyURI(os.Getenv("MONGO_URI"))
+	client, err := mongo.Connect(ctx, clientOptions)
 	if err != nil {
 		return nil, err
 	}
@@ -22,10 +23,6 @@ func Connect(mongoUri string) (*mongo.Client, error) {
 	return client, nil
 }
 
-func Disconnect() error {
-	return MongoClient.Disconnect(context.TODO())
-}
-
-func GetCollection(collectionName string) *mongo.Collection {
-	return MongoClient.Database("Crud").Collection(collectionName)
+func (m *MongoDBService) Disconnect(ctx context.Context) error {
+	return MongoClient.Disconnect(ctx)
 }

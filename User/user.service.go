@@ -12,13 +12,14 @@ import (
 type UserServiceInterface interface {
 	RegisterUser(userReq models.UserRegisterRequest) error
 	LoginUser(userReq models.UserLoginRequest) (string, error)
+	GetUserInfo(id string) models.GetUserInfoResponse
 }
 
 type UserService struct {
-	userRepo *UserRepository
+	userRepo UserRepository
 }
 
-func NewUserService(userRepo *UserRepository) *UserService {
+func NewUserService(userRepo UserRepository) *UserService {
 	return &UserService{
 		userRepo: userRepo,
 	}

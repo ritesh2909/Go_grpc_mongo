@@ -5,6 +5,8 @@ import (
 	"log"
 	"net"
 	"os"
+	"os/signal"
+	"syscall"
 	"user_crud/db"
 	"user_crud/middleware"
 
@@ -21,33 +23,40 @@ func main() {
 		log.Fatalf("Error loading .env file")
 	}
 
-	mongoURI := os.Getenv("MONGO_URI")
-	if mongoURI == "" {
-		panic("Invalid mongo uri")
-	}
-	client, err := db.Connect(mongoURI)
+	_, err = db.InitDB()
 	if err != nil {
-		log.Fatalf("Failed to connect to MongoDB: %v", err)
+		log.Fatalf("Failed to initialize DB: %v", err)
 	}
 
-	defer db.Disconnect()
-
-	userController := user.NewUserController(user.NewUserService(user.NewMongoUserRepository(client)))
+	fmt.Println("DB connected")
 
 	grpcServer := grpc.NewServer(
-		grpc.UnaryInterceptor(middleware.AuthMiddleware),
+		grpc.ChainUnaryInterceptor(middleware.PanicRecoveryInterceptor, middleware.AuthMiddleware),
 	)
+
+	userController := user.NewUserController(user.NewUserService(user.NewUserRepository()))
+
 	pb.RegisterUserServiceServer(grpcServer, userController)
 
 	port := ":50051"
 	lis, err := net.Listen("tcp", port)
 	if err != nil {
-		log.Fatal("Failed to listen on port %s: %v", port, err)
+		log.Fatalf("Failed to listen on port %s: %v", port, err)
 	}
 
-	fmt.Println("Server is running on port", port)
+	signalChan := make(chan os.Signal, 1)
+	signal.Notify(signalChan, syscall.SIGINT, syscall.SIGTERM)
 
-	if err := grpcServer.Serve(lis); err != nil {
-		log.Fatalf("Failed to serve gRPC server: %v", err)
-	}
+	go func() {
+		fmt.Println("Starting gRPC server on", port)
+		if err := grpcServer.Serve(lis); err != nil {
+			fmt.Printf("gRPC server error: %v\n", err)
+		}
+	}()
+
+	<-signalChan
+	fmt.Println("Received shutdown signal. Gracefully shutting down...")
+
+	grpcServer.GracefulStop()
+	fmt.Println("gRPC server successfully shut down.")
 }
