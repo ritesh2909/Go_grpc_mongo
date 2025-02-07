@@ -27,7 +27,7 @@ func InitDB() (DBService, error) {
 
 	ctx := context.Background()
 
-	if _, err := dbService.Connect(ctx, os.Getenv("DB_URI")); err != nil {
+	if _, err := dbService.Connect(ctx, os.Getenv("MONGO_URI")); err != nil {
 		return nil, fmt.Errorf("could not initialize DB: %v", err)
 	}
 
